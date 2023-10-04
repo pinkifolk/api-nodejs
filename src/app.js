@@ -8,6 +8,7 @@ import myconn from 'express-myconnection'
 import products from './routes/products'
 import menu from './routes/menu'
 import user from './routes/auth'
+import impruvex from './routes/impruvex'
 import conexion from './database'
 import mysql from 'mysql'
 import verifytoken from './middlewares/verifytoken'
@@ -47,6 +48,9 @@ app.use('/api/products', verifytoken, products)
 app.use('/api/menu', menu)
 // Information about the user
 app.use('/api/user', user)
+// Integration with Impruvex
+app.use('/api/impruvex', impruvex)
+
 
 
 export default app;
