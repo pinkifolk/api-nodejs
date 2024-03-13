@@ -22,6 +22,7 @@ export const getDataUser = async (req, res) => {
                 "results": data
             })
         })
+        conexion.end()
     })
 }
 /*
@@ -62,5 +63,6 @@ export const login = async (req, res) => {
             }
 
         })
+        conexion.end()
     })
 }

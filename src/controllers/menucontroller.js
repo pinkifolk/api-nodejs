@@ -18,8 +18,8 @@ export const getMenuHome = async (req, res) => {
         "messaje": "Datos Obtenidos",
         "results": data
       })
-      conexion.end();
     })
+    conexion.end()
   })
 }
 
