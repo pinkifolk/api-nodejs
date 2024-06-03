@@ -12,7 +12,7 @@ import impruvex from './routes/impruvex'
 import conexion from './database'
 import mysql from 'mysql'
 import verifytoken from './middlewares/verifytoken'
-
+import shopify from './routes/shopify'
 /*
     Init and configuration of the module
 */
@@ -50,6 +50,8 @@ app.use('/api/menu', menu)
 app.use('/api/user', user)
 // Integration with Impruvex
 app.use('/api/impruvex', impruvex)
+// Integration with Shopify
+app.use('/api/shopify', shopify)
 
 
 
