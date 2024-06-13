@@ -9,10 +9,12 @@ import products from './routes/products'
 import menu from './routes/menu'
 import user from './routes/auth'
 import impruvex from './routes/impruvex'
+import sync from './routes/sync'
 import conexion from './database'
 import mysql from 'mysql'
 import verifytoken from './middlewares/verifytoken'
 import shopify from './routes/shopify'
+
 /*
     Init and configuration of the module
 */
@@ -21,6 +23,7 @@ app.set('pkg', pkg)
 app.use(cors(corsOptions))
 app.use(myconn(mysql, conexion, 'single'))
 app.use(express.json())
+
 
 /*
     configuration the Cors
@@ -52,6 +55,8 @@ app.use('/api/user', user)
 app.use('/api/impruvex', impruvex)
 // Integration with Shopify
 app.use('/api/shopify', shopify)
+// Integration with google sheet
+app.use('/api/google', sync)
 
 
 
