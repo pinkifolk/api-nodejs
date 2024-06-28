@@ -11,5 +11,4 @@ route.get('/download',(req,res)=>{
     })
 })
 route.get('/all',shopifyController.updateAll)
-route.get('/:id',shopifyController.updateStockById)
 export default route
