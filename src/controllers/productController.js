@@ -21,8 +21,7 @@ export const getProductsById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 /*
@@ -48,8 +47,7 @@ export const getVariablesById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 /*
@@ -73,8 +71,7 @@ export const getFamiliaMultimediaById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 /*
@@ -105,8 +102,7 @@ export const getProductosById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 /*
@@ -131,8 +127,7 @@ export const getProductosInicioById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 /*
@@ -155,8 +150,7 @@ export const getProductsSpecialById = async (req, res) => {
                 "messaje": "Datos Obtenidos",
                 "results": data
             })
-        })
-        conexion.end()
+        })        
     })
 }
 

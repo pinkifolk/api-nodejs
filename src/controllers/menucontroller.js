@@ -9,7 +9,6 @@
 */
 export const getMenuHome = async (req, res) => {
   await req.getConnection(async (error, conexion) => {
-    conexion.connect();
     if (error) return res.send(error)
     await conexion.query('select id,descripcion "title" from super_categorias_com where menu = 0 and linea_id=1 and id <> 1 order by id asc', (err, data) => {
       if (err) return res.send(err)
@@ -19,7 +18,6 @@ export const getMenuHome = async (req, res) => {
         "results": data
       })
     })
-    conexion.end()
   })
 }
 

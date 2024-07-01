@@ -12,22 +12,22 @@
   "author": "Sebastian Solis",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "express-myconnection": "^1.0.4",
-    "google-auth-library": "^9.10.0",
-    "google-spreadsheet": "^4.1.2",
-    "helmet": "^4.6.0",
-    "jsonwebtoken": "^8.5.1",
-    "mysql": "^2.18.1",
-    "shopify-api-node": "^3.13.1"
+    "cors": "2.8.5",
+    "express": "4.17.1",
+    "express-myconnection": "1.0.4",
+    "google-auth-library": "9.10.0",
+    "google-spreadsheet": "4.1.2",
+    "helmet": "4.6.0",
+    "jsonwebtoken": "8.5.1",
+    "mysql": "2.18.1",
+    "shopify-api-node": "3.13.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.0",
-    "@babel/core": "^7.16.5",
-    "@babel/node": "^7.16.5",
-    "@babel/plugin-transform-runtime": "^7.17.0",
-    "@babel/preset-env": "^7.16.5",
-    "nodemon": "^2.0.15"
+    "@babel/cli": "7.16.0",
+    "@babel/core": "7.16.5",
+    "@babel/node": "7.16.5",
+    "@babel/plugin-transform-runtime": "7.17.0",
+    "@babel/preset-env": "7.16.5",
+    "nodemon": "2.0.15"
   }
 }
