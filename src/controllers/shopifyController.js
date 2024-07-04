@@ -1,99 +1,104 @@
 import Shopify from "shopify-api-node"
-import fs from "fs"
+
 const shop = new Shopify({
   shopName: process.env.SHOPIFY_NAME,
   apiKey: process.env.SHOPIFY_API_KEY,
   password: process.env.SHOPIFY_PASSWORD,
 })
 
-async function updateStock(inventoryId, available) {
+async function updateStock(data) {
   try {
-    const update = await shop.inventoryLevel.set({
-      location_id: process.env.SHOPIFY_LOCATATION_ID,
-      inventory_item_id: inventoryId,
-      available: available,
+    data.map(async (items) => {
+      await shop.inventoryLevel.set({
+        location_id: process.env.SHOPIFY_LOCATATION_ID,
+        inventory_item_id: items.inventory_item_id,
+        available: items.available,
+      })
     })
-    return update
   } catch (error) {
     console.error(error)
   }
 }
+async function getProducts() {
+  let params = { limit: 250 }
+  let variante = []
+  let j = 1
 
-async function getCountProducto() {
-  try {
-    const countProduct = await shop.product.count()
-    return countProduct
-  } catch (error) {
-    console.error(error)
-    return res
-      .status(500)
-      .json({ message: "Error en consultar los datos a shopify" })
-  }
+  do {
+    const product = await shop.product.list(params)
+    product.forEach((prod, index) => {
+      variante.push({
+        index: j,
+        title: prod.title,
+        variants: prod.variants,
+      })
+    })
+    j++
+
+    params = product.nextPageParameters
+  } while (params !== undefined)
+  return variante
 }
 export const updateAll = async (req, res) => {
-  try {
-    const allProducts = await shop.product.list({ limit: 2 })
-    const totalProd = allProducts.length
-    var countLineUpdate = 0
-    var countLineNoFound = 0
-    var detNoFound = []
-
-    for (const { variants } of allProducts) {
-      // buscar en la base de datos
-      for (const variant of variants) {
-        const data = await new Promise((resolve, reject) => {
-          req.getConnection((error, conexion) => {
-            if (error) {
-              reject(error)
-            } else {
-              conexion.query(
-                'SELECT stock FROM stock WHERE producto_id=(SELECT id FROM productos WHERE origen="P" AND cod_unificado=?)',
-                [variant.sku],
-                (err, data) => {
-                  if (err) {
-                    reject(err)
-                  } else {
-                    resolve(data)
-                  }
-                }
-              )
-            }
-          })
-        })
-        if (data.length === 0) {
-          countLineNoFound += 1
-          detNoFound.push(`el codigo: ${variant.sku} no existe`)
-        } else if (data[0].stock != variant.inventory_quantity) {
-          // actualizar
-          try {
-            updateStock(variant.inventory_item_id, data[0].stock)
-            countLineUpdate += 1
-          } catch (error) {
-            console.error(error)
-          }
-        }
-      }
-    }
-    if (countLineNoFound > 0) {
-      fs.writeFileSync("no_existen.txt", JSON.stringify(detNoFound), (err) => {
-        if (err) return console.error(err)
+  //procesar datos de shopify
+  const variants = await getProducts()
+  let allVariants = []
+  for (const { variants } of variants) {
+    for (const variant of variants) {
+      allVariants.push({
+        sku: variant.sku,
+        variantId: variant.inventory_item_id,
+        stockShop: variant.inventory_quantity,
       })
-    } else {
-      detNoFound = []
     }
-
-    res.json({
-      message: "Proceso masivo realizado",
-      totalProd:totalProd,
-      prodActualizados: countLineUpdate,
-      prodNoEncontrados: countLineNoFound,
-      ...(countLineNoFound > 0) && {urlDetalleNoEncontrados: "https://api.provaltec.cl/api/shopify/download"},
-      ...(countLineNoFound > 0) && {urlDetalleNoEncontradosDev: "http://localhost:3000/api/shopify/download"} 
-      
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Error al realizar el proceso" })
   }
-}
+  let totalSKUs = allVariants.length
 
+  // procesar datos de provaltec
+  const data = await new Promise((resolve, reject) => {
+    req.getConnection((error, conexion) => {
+      if (error) {
+        reject(error)
+      } else {
+        conexion.query(
+          "SELECT P.cod_unificado, S.stock FROM stock S LEFT JOIN productos P ON P.id=S.producto_id WHERE cod_unificado IS NOT NULL",
+          (err, data) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(data)
+            }
+          }
+        )
+      }
+    })
+  })
+  // Machear el stock de shopify con el de provaltec
+  const newVariants = allVariants.map((variant) => {
+    const found = data.find((item) => item.cod_unificado === variant.sku)
+    if (found) {
+      variant.stockPvt = found.stock
+    }
+    return variant
+  })
+
+  const differenStock = newVariants.filter(
+    (variant) => variant.stockShop != variant.stockPvt
+  )
+  let prodActualizados = differenStock.length
+
+  let dataOfUpdate = []
+  for (const updateItem of differenStock) {
+    dataOfUpdate.push({
+      location_id: process.env.SHOPIFY_LOCATATION_ID,
+      inventory_item_id: updateItem.variantId,
+      available: updateItem.stockPvt,
+    })
+  }
+  updateStock(dataOfUpdate)
+  res.json({
+    message: "Proceso masivo realizado",
+    totalSKUs: totalSKUs,
+    skusActualizados: prodActualizados,
+  })
+}
