@@ -114,6 +114,6 @@ export const updateAll = async (req, res) => {
     message: "Proceso masivo realizado",
     totalSKUs: totalSKUs,
     skusActualizados: prodActualizados - dataNotFound.length,
-    skusNoEncontrados: dataNotFound,
+    skusNoEncontrados: dataNotFound.length === 0 ? dataNotFound.length : dataNotFound,
   })
 }
