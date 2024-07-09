@@ -8,15 +8,15 @@ const shop = new Shopify({
 
 async function updateStock(data) {
   try {
-    data.map(async (items) => {
+    for(const items of data){
       await shop.inventoryLevel.set({
         location_id: process.env.SHOPIFY_LOCATATION_ID,
         inventory_item_id: items.inventory_item_id,
         available: items.available,
       })
-    })
+    }
   } catch (error) {
-    console.error(error)
+    console.error('Error al actualizar:',error)
   }
 }
 async function getProducts() {
@@ -85,20 +85,35 @@ export const updateAll = async (req, res) => {
   const differenStock = newVariants.filter(
     (variant) => variant.stockShop != variant.stockPvt
   )
+
   let prodActualizados = differenStock.length
 
-  let dataOfUpdate = []
+  let dataOfUpdate = []  
+  let dataNotFound = []  
   for (const updateItem of differenStock) {
-    dataOfUpdate.push({
-      location_id: process.env.SHOPIFY_LOCATATION_ID,
-      inventory_item_id: updateItem.variantId,
-      available: updateItem.stockPvt,
-    })
+    if(updateItem.stockPvt === undefined){
+      dataNotFound.push({
+        message:'Producto no encontrado, Detalles:',
+        sku: updateItem.sku,
+        idVariant: updateItem.variantId,
+      })
+    }else{
+      dataOfUpdate.push({
+        location_id: process.env.SHOPIFY_LOCATATION_ID,
+        inventory_item_id: updateItem.variantId,
+        available: updateItem.stockPvt,
+      })
+    }    
   }
-  updateStock(dataOfUpdate)
+  try {
+    updateStock(dataOfUpdate)    
+  } catch (error) {
+    console.error(error)
+  }
   res.json({
     message: "Proceso masivo realizado",
     totalSKUs: totalSKUs,
-    skusActualizados: prodActualizados,
+    skusActualizados: prodActualizados - dataNotFound.length,
+    skusNoEncontrados: dataNotFound,
   })
 }
